@@ -47,4 +47,38 @@ This project uses **Docker Compose** to manage the Apache Airflow environment. T
    ```bash
    docker compose up --build -d
    ```
-3. **Access Airflow UI:** Navigate to `http://localhost:8080` and log in with the default credentials (`airflow`/`airflow`).
+3. **Initialize the Database:** (Required on first run)
+   ```bash
+   docker compose run --rm airflow-webserver airflow db migrate
+   ```
+4. **Create Admin User:**
+   ```bash
+   docker compose run --rm airflow-webserver airflow users create \
+  --username admin \
+  --firstname admin \
+  --lastname admin \
+  --role Admin \
+  --email admin@example.com \
+  --password admin
+   ```
+5. **Access Airflow UI:** Navigate to `http://localhost:8080` and log in with the default credentials (`admin`/`admin`).
+
+Note: If `localhost` fails to connect on macOS, use `127.0.0.1` to bypass potential AirPlay port conflicts.
+
+
+## 3: Data Pipeline (Airflow ETL)
+
+The pipeline is orchestrated as a **DAG** (Directed Acyclic Graph) in Airflow, designed for reliable batch processing of IoT telemetry.
+
+### Task Architecture: `process_engine_data`
+A unified **PythonOperator** handles the end-to-end transformation logic to ensure atomic execution:
+
+1. **Ingestion & Deduplication:** Aggregates multi-source CSVs from the `/opt/airflow/engine_data` volume and enforces unique constraints on `engine_id` and `timestamp`.
+2. **Validation (Shared Config):** Validates sensor ranges (RPM, Temp, Oil Pressure, Fuel) against the `config.py` "Source of Truth." 
+3. **Data Imputation:** Dynamically replaces out-of-range sensor values with the mean for that specific `engine_id` to maintain data continuity.
+4. **Statistical Aggregation:** Computes batch-level performance metrics (Mean, Median, Min, Max) for each engine.
+
+### Pipeline Execution
+1. **Trigger:** The DAG runs on an `@hourly` schedule or via manual trigger.
+2. **Persistence:** Cleaned datasets and calculated statistics are persisted to a SQLite database.
+3. **Data Quality Monitoring:** Validation failures are captured in a dedicated `validation_errors` table, while runtime execution details are stored in Airflow Task Logs.

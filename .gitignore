@@ -6,7 +6,20 @@ __pycache__/
 # C extensions
 *.so
 
+
+# Docker / Database
+postgres_data/
+airflow.db
+standalone_admin_password.txt
+webserver_config.py
+
+# Airflow Runtime
+logs/
+results/
 engine_data/
+__pycache__/
+*.pyc
+airflow.cfg
 
 # Distribution / packaging
 .Python
