@@ -2,7 +2,7 @@
 A robust data engineering pipeline for ingesting, validating, and analyzing synthetic combustion engine telemetry using Apache Airflow, Python, and SQLite.
 
 
-## Phase 1: Engine Telemetry Generator
+## 1: Engine Telemetry Generator
 
 The first component is a Python-based simulation engine. It is designed to model realistic internal combustion engine behavior while intentionally introducing data quality issues to test pipeline resilience.
 
@@ -31,3 +31,20 @@ The generator injects "Realistic Anomalies":
 2. Run the generator script:
    ```bash
    python generator.py
+
+## 2: Environment & Orchestration
+
+This project uses **Docker Compose** to manage the Apache Airflow environment. This ensures that the pipeline, database, and dependencies (like Pandas) are consistent across any machine.
+
+### Infrastructure Components
+* **Airflow Webserver/Scheduler:** Orchestrates the data flow.
+* **Postgres:** Stores Airflow metadata.
+* **Custom Dockerfile:** Extends the base Airflow image to include `pandas` and `scipy` for data transformation.
+
+### Environment Setup
+1. **Prerequisites:** Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+2. **Start the Environment:**
+   ```bash
+   docker compose up --build -d
+   ```
+3. **Access Airflow UI:** Navigate to `http://localhost:8080` and log in with the default credentials (`airflow`/`airflow`).
