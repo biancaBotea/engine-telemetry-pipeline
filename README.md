@@ -19,16 +19,18 @@ Each engine produces a CSV file containing 90 minutes of data with the following
 | `fuel_cons` | Float | Rate of fuel consumption. |
 | `status` | String | Logic-based health state (`running`, `warning`, `error`). |
 
-### Chaos Engineering
-The generator injects "Realistic Anomalies":
+### Chaos Engineering & Data Quality
+The generator injects "Realistic Anomalies" to validate the Airflow ETL's cleaning logic:
 
+* **Duplicate Injection:** A 5% probability check triggers a "double-write" of the current telemetry row, simulating sensor stutter or network retries.
 * **Sentinel Values:** `RPM` may drop to `-999.0` or `Temp` may spike to `999.9` to simulate hardware sensor failure.
 * **Null Values:** `oil_pressure` occasionally reports as `None` (empty in CSV) to simulate intermittent signal loss.
-* **Self-Healing Physics:** The simulation recovers from anomalies in the subsequent timestep, allowing for the testing of point-anomaly filtering vs. persistent failure detection.
+* **Shared Config Validation:** Thresholds for "Normal" vs "Anomalous" data are pulled directly from `utils/config.py`, ensuring the Generator and the DAG use the same Source of Truth.
 
 ### How to Run
-1. Ensure you have Python 3.x installed.
-2. Run the generator script:
+1. Ensure you have Python 3.x and `pandas` installed.
+2. Ensure the `utils/config.py` file is present in the project root.
+3. Run the generator script:
    ```bash
    python generator.py
 
