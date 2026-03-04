@@ -2,7 +2,6 @@ import random
 from datetime import datetime, timedelta
 import csv
 import os
-from turtle import pd
 from utils.config import THRESHOLDS
 
 class Engine:
@@ -14,7 +13,7 @@ class Engine:
         self.timestamp = datetime.now()
         self.rpm = random.uniform(500, 7000)
         self.temp = random.uniform(20.0, 70.0)
-        self.oil_pressure = 20 + (self.rpm * 0.01) + random.uniform(0.5, 5.5)
+        self.oil_pressure = 0.5 + (self.rpm * 0.001) + random.uniform(0.1, 0.5)
         self.fuel_cons = (self.rpm * 0.0001) + random.uniform(0.0, 0.5)
         self.status = "idle"
         
@@ -44,7 +43,7 @@ class Engine:
             self.temp -= (self.temp - 20) * 0.1
 
         # Simulate oil pressure changes
-        self.oil_pressure = self.rpm * 0.012 + random.uniform(2.0, 5.0)
+        self.oil_pressure = 0.5 + (self.rpm * 0.0006) + random.uniform(0.1, 0.4)
 
         # Simulate fuel consumption changes
         self.fuel_cons = self.rpm * 0.005 + random.uniform(0.1, 0.8)

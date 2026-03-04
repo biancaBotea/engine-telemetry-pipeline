@@ -1,0 +1,7 @@
+# Data Processing
+pandas
+numpy
+
+# Visualization
+streamlit
+plotly

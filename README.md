@@ -84,3 +84,33 @@ A unified **PythonOperator** handles the end-to-end transformation logic to ensu
 1. **Trigger:** The DAG runs on an `@hourly` schedule or via manual trigger.
 2. **Persistence:** Cleaned datasets and calculated statistics are persisted to a SQLite database.
 3. **Data Quality Monitoring:** Validation failures are captured in a dedicated `validation_errors` table, while runtime execution details are stored in Airflow Task Logs.
+
+## 4. Visualization & Data Quality Dashboard
+
+To analyze the processed telemetry and verify the integrity of the ETL pipeline, a custom dashboard was built using **Streamlit** and **Plotly**.
+
+### How to Run
+Ensure the Airflow pipeline has completed at least one run, then execute:
+```bash
+pip install -r requirements.txt
+streamlit run visualize_results.py
+```
+
+### Dashboard Features
+The application is organized into four strategic views:
+
+1. **Engine Deep-Dive:** 
+- Synchronized Telemetry: Stacked charts for RPM, Temperature, and Oil Pressure sharing a common timeline to identify sensor correlations.
+- Sensor vs. Performance Stats: Overlays telemetry with Mean/Max thresholds from the engine_stats table
+
+2. **Engine Comparison:**
+- Uses Box Plots to visualize the statistical distribution of sensors across all engines.
+- This view is critical for identifying "outlier" engines whose variance differs from the fleet norm.
+
+3. **Error Audit & Pipeline Health:**
+- Fleet Snapshot: A bar chart ranking engines by the number of anomalies caught.
+- Health Scoring: Calculates a % reliability score based on the ratio of cleaned records vs. validation errors.
+- Anomaly Timeline: A scatter plot mapping exactly when sensor failures occurred during the simulation.
+
+4. **Data Inspector:** 
+- Direct access to the SQLite database. Used to verify the raw state of the cleaned_telemetry, engine_stats, and validation_errors tables.
