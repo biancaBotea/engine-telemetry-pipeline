@@ -65,9 +65,9 @@ This project uses **Docker Compose** to manage the Apache Airflow environment. T
 
 ### Environment Setup
 1. **Prerequisites:** Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-2. **Start the Environment:**
+2. **Build and start the database:**
    ```bash
-   docker compose up --build -d
+   docker compose up -d postgres
    ```
 3. **Initialize the Database:** (Required on first run)
    ```bash
@@ -75,18 +75,20 @@ This project uses **Docker Compose** to manage the Apache Airflow environment. T
    ```
 4. **Create Admin User:**
    ```bash
-   docker compose run --rm airflow-webserver airflow users create \
-      --username admin \
-      --firstname admin \
-      --lastname admin \
-      --role Admin \
-      --email admin@example.com \
-      --password admin
+   docker compose run --rm airflow-webserver airflow users create --username admin --firstname admin --lastname admin --role Admin --email admin@example.com --password admin
    ```
+5. **Start Airflow:**
+   ```bash
+   docker compose up -d
 
-5. **Access Airflow UI:** Navigate to `http://localhost:8080` and log in with the default credentials (`admin`/`admin`).
+6. **Access Airflow UI:** Navigate to `http://localhost:8080` and log in with the default credentials (`admin`/`admin`).
 
 Note: If `localhost` fails to connect on macOS, use `127.0.0.1` to bypass potential AirPlay port conflicts.
+
+### Run the Pipeline
+1. **Unpause the DAG:** Toggle the switch next to `process_engine_data` to **On**
+2. **Trigger Manually:** Click the **Play** button (top right) and select **Trigger DAG** to start the initial run immediately.
+3. **Monitor:** The Graph View will turn dark green as each task (Deduplicate → Impute → Analyze) completes.
 
 ## 3: Data Pipeline (Airflow ETL)
 
