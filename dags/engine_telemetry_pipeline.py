@@ -28,7 +28,6 @@ dag = DAG(
 )
 
 def process_data():
-    print("DEBUG: Starting data processing...")
 
     if not os.path.exists(DATA_DIR):
         print(f"ERROR: {DATA_DIR} not found")

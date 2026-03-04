@@ -1,30 +1,13 @@
 # Engine Telemetry Pipeline
 A robust data engineering pipeline for ingesting, validating, and analyzing synthetic combustion engine telemetry using Apache Airflow, Python, and SQLite.
 
-## 📐 System Architecture
-
-```mermaid
-   graph TD
-      A[Python Generator] -->|Raw CSVs| B(Data Landing Zone)
-      
-      subgraph Airflow_ETL [Airflow Processing]
-         C[Ingest & Deduplicate] --> D[Clean & Impute]
-         D -->|Valid Data| E[Statistical Analysis]
-      end
-
-      B --> C
-      E -->|Cleaned Data / Stats| F[(SQLite Database)]
-      D -->|Error Logs| F
-      F --> G[Streamlit Dashboard]
-
-      style Airflow_ETL fill:#f5f5f5,stroke:#333,stroke-width:2px
-```
 ## Project Structure
 ```text
    .
    ├── dags/
    │   └── process_engine_data.py   # Airflow DAG logic
    ├── engine_data/                 # Raw CSV Landing Zone (Generated)
+   ├── logs/                        # Airflow Task Logs (Tracked via .gitkeep)
    ├── results/
    │   └── engine_analytics.db      # SQLite Database (Output)
    ├── utils/
@@ -62,9 +45,11 @@ The generator injects "Realistic Anomalies" to validate the Airflow ETL's cleani
 * **Shared Config Validation:** Thresholds for "Normal" vs "Anomalous" data are pulled directly from `utils/config.py`, ensuring the Generator and the DAG use the same Source of Truth.
 
 ### How to Run
-1. Ensure you have Python 3.x and `pandas` installed.
-2. Ensure the `utils/config.py` file is present in the project root.
-3. Run the generator script:
+1. Ensure you have Python 3.x and install requirements .
+   ```bash
+   pip install -r requirements.txt
+
+2. Run the generator script:
    ```bash
    python generator.py
    ```
@@ -90,13 +75,13 @@ This project uses **Docker Compose** to manage the Apache Airflow environment. T
    ```
 4. **Create Admin User:**
    ```bash
-      docker compose run --rm airflow-webserver airflow users create \
-         --username admin \
-         --firstname admin \
-         --lastname admin \
-         --role Admin \
-         --email admin@example.com \
-         --password admin
+   docker compose run --rm airflow-webserver airflow users create \
+      --username admin \
+      --firstname admin \
+      --lastname admin \
+      --role Admin \
+      --email admin@example.com \
+      --password admin
    ```
 
 5. **Access Airflow UI:** Navigate to `http://localhost:8080` and log in with the default credentials (`admin`/`admin`).
@@ -127,6 +112,16 @@ A unified **PythonOperator** handles the end-to-end transformation logic to ensu
 * **Database (SQLite):** Selected for its "zero-config" portability, allowing the reviewer to inspect results without setting up a database server.
 * **Validation (Shared Config):** By using a central `utils/config.py`, I ensured that the Generator (Source) and the ETL (Processing) stay synchronized, preventing "logic drift" as sensor thresholds evolve.
 
+## Database Schema
+The pipeline persists data to `results/engine_analytics.db` with the following structure:
+
+- `cleaned_telemetry`: Deduplicated and imputed sensor readings (`rpm`, `temp`, `oil_pressure`, `fuel_cons`).
+- `engine_stats`: Summary table containing:
+      -Identifiers: `engine_id`, `start_time`, `end_time`.
+      -Aggregates: `[sensor]_mean`, `_median`, `_min`, `_max` for all numeric fields.
+- `validation_errors`: Audit log capturing error_type and original_value for every intercepted anomaly.
+
+
 ## 4. Visualization & Data Quality Dashboard
 
 To analyze the processed telemetry and verify the integrity of the ETL pipeline, a custom dashboard was built using **Streamlit** and **Plotly**.
@@ -134,8 +129,7 @@ To analyze the processed telemetry and verify the integrity of the ETL pipeline,
 ### How to Run
 Ensure the Airflow pipeline has completed at least one run, then execute:
 ```bash
-   pip install -r requirements.txt
-   streamlit run visualize_results.py
+streamlit run visualize_results.py
 ```
 
 ### Dashboard Features
@@ -156,3 +150,22 @@ The application is organized into four strategic views:
 
 4. **Data Inspector:** 
    - Direct access to the SQLite database. Used to verify the raw state of the cleaned_telemetry, engine_stats, and validation_errors tables.
+
+## System Architecture
+
+```mermaid
+   graph TD
+      A[Python Generator] -->|Raw CSVs| B(Data Landing Zone)
+      
+      subgraph Airflow_ETL [Airflow Processing]
+         C[Ingest & Deduplicate] --> D[Clean & Impute]
+         D -->|Valid Data| E[Statistical Analysis]
+      end
+
+      B --> C
+      E -->|Cleaned Data / Stats| F[(SQLite Database)]
+      D -->|Error Logs| F
+      F --> G[Streamlit Dashboard]
+
+      style Airflow_ETL fill:#f5f5f5,stroke:#333,stroke-width:2px
+```

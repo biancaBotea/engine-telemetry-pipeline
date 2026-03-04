@@ -14,9 +14,10 @@ standalone_admin_password.txt
 webserver_config.py
 
 # Airflow Runtime
-logs/
-results/
-engine_data/
+logs/*
+!logs/.gitkeep
+*.db
+*.csv
 __pycache__/
 *.pyc
 airflow.cfg

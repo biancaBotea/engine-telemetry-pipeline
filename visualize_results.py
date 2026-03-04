@@ -10,7 +10,7 @@ st.set_page_config(page_title="Engine Analytics", layout="wide")
 # Database Connection
 DB_PATH = 'results/engine_analytics.db'
 if not os.path.exists(DB_PATH):
-    st.error("⚠️ Database not found! Please run the Airflow pipeline first to generate results.")
+    st.error("Database not found! Please run the Airflow pipeline first to generate results.")
     st.stop()
 
 def get_data(query):
@@ -68,7 +68,7 @@ with tab1:
 # Engines Comparison
 with tab2:
     st.header("Engines Variance Analysis")
-    # We use the cleaned_telemetry table to get the full distribution, not just stats
+
     df_all_telemetry = get_data("SELECT engine_id, rpm, temp, oil_pressure, fuel_consumption FROM cleaned_telemetry")
     
     metric_choice = st.selectbox("Select Metric to Compare Distribution", 
@@ -83,12 +83,12 @@ with tab2:
     
     st.plotly_chart(fig_box, use_container_width=True)
     
-    st.info("💡 **How to read this:** The 'box' shows where 50% of the data lives. "
+    st.info("**How to read this:** The 'box' shows where 50% of the data lives. "
             "Dots outside the whiskers are the anomalies caught by your pipeline.")
     
 #  Error Audit & Data Quality
 with tab3:
-    st.header("🛠️ Data Quality & Pipeline Health")
+    st.header("Data Quality & Pipeline Health")
     
     # Load Data
     df_err = get_data("SELECT * FROM validation_errors")
@@ -162,7 +162,7 @@ with tab3:
                 st.info("Perfect sensor performance recorded.")
             
     else:
-        st.success("✅ No validation errors found in the database!")
+        st.success("No validation errors found in the database!")
 # Database Inspector
 with tab4:
     st.header("Database Table Viewer")
