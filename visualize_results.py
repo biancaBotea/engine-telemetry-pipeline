@@ -3,11 +3,15 @@ import pandas as pd
 import sqlite3
 import plotly.graph_objects as go
 import plotly.express as px
+import os
 
 st.set_page_config(page_title="Engine Analytics", layout="wide")
 
 # Database Connection
 DB_PATH = 'results/engine_analytics.db'
+if not os.path.exists(DB_PATH):
+    st.error("⚠️ Database not found! Please run the Airflow pipeline first to generate results.")
+    st.stop()
 
 def get_data(query):
     with sqlite3.connect(DB_PATH) as conn:
@@ -27,6 +31,13 @@ with tab1:
     df_stats = get_data(f"SELECT * FROM engine_stats WHERE engine_id = '{selected_engine}'")
 
     st.subheader(f"Correlation: {selected_engine} Sensors")
+
+    # Start and end timestamps for the telemetry data
+    if not df_telemetry.empty:
+        start_time = pd.to_datetime(df_telemetry['timestamp'].min())
+        end_time = pd.to_datetime(df_telemetry['timestamp'].max())
+        duration = (end_time - start_time).total_seconds() / 60
+        st.info(f"**Analysis Window:** {start_time.strftime('%H:%M:%S')} to {end_time.strftime('%H:%M:%S')} ({duration:.1f} Minutes)")
     
     import plotly.subplots as sp
 

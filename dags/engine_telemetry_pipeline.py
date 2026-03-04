@@ -74,7 +74,8 @@ def process_data():
         'rpm': ['mean', 'median', 'min', 'max'],
         'temp': ['mean', 'median', 'min', 'max'],
         'oil_pressure': ['mean', 'median', 'min', 'max'],
-        'fuel_consumption': ['mean', 'median', 'min', 'max']
+        'fuel_consumption': ['mean', 'median', 'min', 'max'],
+        "timestamp": ['min', 'max']
     })
     stats_df.columns = ['_'.join(col).strip() for col in stats_df.columns.values]
     stats_df = stats_df.reset_index()
